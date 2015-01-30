@@ -33,13 +33,13 @@ import org.apache.poi.xssf.usermodel.XSSFDrawing;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.azkfw.document.tools.dp.BasicDirectoryParser;
-import org.azkfw.document.tools.dp.DirectoryParser;
-import org.azkfw.document.tools.dp.DirectoryParserDecorator;
-import org.azkfw.document.tools.dp.DirectoryParserEvent;
-import org.azkfw.document.tools.dp.DirectoryParserFileInfo;
-import org.azkfw.document.tools.dp.DirectoryParserListener;
-import org.azkfw.document.tools.dp.DirectoryParserPlainDecorator;
+import org.azkfw.document.tools.parser.dp.BasicDirectoryParser;
+import org.azkfw.document.tools.parser.dp.DirectoryParser;
+import org.azkfw.document.tools.parser.dp.DirectoryParserDecorator;
+import org.azkfw.document.tools.parser.dp.DirectoryParserEvent;
+import org.azkfw.document.tools.parser.dp.DirectoryParserFileInfo;
+import org.azkfw.document.tools.parser.dp.DirectoryParserListener;
+import org.azkfw.document.tools.parser.dp.DirectoryParserPlainDecorator;
 
 /**
  * このクラスは、ディレクトリ構成をエクセル出力するクラスです。
@@ -114,8 +114,8 @@ public class ExcelDocument {
 			parser.setDecorator(decorator);
 			parser.addListener(new DirectoryParserListener() {
 				@Override
-				public void directoryParserFindFile(final DirectoryParserEvent event, final DirectoryParserFileInfo info) {
-					onFindFile(info);
+				public void documentParserCallback(final DirectoryParserEvent event) {
+					onFindFile(event);
 				}
 			});
 			parser.parse(directory);
@@ -142,7 +142,8 @@ public class ExcelDocument {
 		return result;
 	}
 
-	private void onFindFile(final DirectoryParserFileInfo info) {
+	private void onFindFile(final DirectoryParserEvent event) {
+		DirectoryParserFileInfo info = event.getInfo();
 		String prefix = info.getPrefix();
 		File file = info.getFile();
 

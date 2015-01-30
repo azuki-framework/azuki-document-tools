@@ -15,25 +15,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.azkfw.document.tools.dp;
+package org.azkfw.document.tools.parser.ws.rsp;
+
+import java.io.File;
+
+import org.azkfw.document.tools.parser.DocumentParser;
 
 /**
- * このクラスは、ディレクトリ解析のイベント情報を保持するクラスです。
+ * このインターフェースは、JarからJAX-RS解析を定義する為のインターフェースです。
  * 
  * @since 1.0.0
- * @version 1.0.0 2015/01/28
+ * @version 1.0.0 2015/01/30
  * @author kawakicchi
  */
-public class DirectoryParserEvent {
-
-	private DirectoryParser parser;
-
-	public DirectoryParserEvent(final DirectoryParser parser) {
-		this.parser = parser;
-	}
-
-	public DirectoryParser getParser() {
-		return parser;
-	}
+public interface RESTfulParser extends DocumentParser<File, RESTfulParserEvent, RESTfulParserListener> {
 
 }

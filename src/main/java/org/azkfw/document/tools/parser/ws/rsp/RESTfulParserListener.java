@@ -15,8 +15,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package org.azkfw.document.tools.parser.ws.rsp;
+
+import org.azkfw.document.tools.parser.DocumentParserListener;
 
 /**
- * ディレクトリ解析関連のクラスおよびインタフェースを提供します。
+ * このインターフェースは、JarからJAX-RS解析のイベント定義したリスナーです。
+ * 
+ * @since 1.0.0
+ * @version 1.0.0 2015/01/28
+ * @author kawakicchi
  */
-package org.azkfw.document.tools.dp;
+public interface RESTfulParserListener extends DocumentParserListener<RESTfulParserEvent> {
+
+}

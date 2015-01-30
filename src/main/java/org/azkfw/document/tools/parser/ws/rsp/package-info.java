@@ -15,17 +15,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.azkfw.document.tools.dp;
 
 /**
- * このインターフェースは、ディレクトリ解析のイベント定義したリスナーです。
  * 
- * @since 1.0.0
- * @version 1.0.0 2015/01/28
- * @author kawakicchi
  */
-public interface DirectoryParserListener {
-
-	public void directoryParserFindFile(final DirectoryParserEvent event, final DirectoryParserFileInfo info);
-
-}
+package org.azkfw.document.tools.parser.ws.rsp;

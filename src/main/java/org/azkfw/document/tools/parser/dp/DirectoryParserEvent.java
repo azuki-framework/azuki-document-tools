@@ -15,30 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.azkfw.document.tools.dp;
+package org.azkfw.document.tools.parser.dp;
 
 /**
- * このインターフェースは、ディレクトリ解析の装飾を定義する為のインターフェースです。
+ * このクラスは、ディレクトリ解析のイベント情報を保持するクラスです。
  * 
  * @since 1.0.0
  * @version 1.0.0 2015/01/28
  * @author kawakicchi
  */
-public interface DirectoryParserDecorator {
+public class DirectoryParserEvent {
 
-	public String getMiddleString();
+	private DirectoryParser parser;
+	private DirectoryParserFileInfo info;
 
-	public boolean isMiddleString(final String string);
+	public DirectoryParserEvent(final DirectoryParser parser) {
+		this.parser = parser;
+	}
 
-	public String getTerminalString();
+	public DirectoryParser getParser() {
+		return parser;
+	}
 
-	public boolean isTerminalString(final String string);
+	public void setInfo(final DirectoryParserFileInfo info) {
+		this.info = info;
+	}
 
-	public String getParentEmptyString();
-
-	public boolean isParentEmptyString(final String string);
-
-	public String getParentJoinString();
-
-	public boolean isParentJoinString(final String string);
+	public DirectoryParserFileInfo getInfo() {
+		return info;
+	}
 }

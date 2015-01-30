@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.azkfw.document.tools.dp;
+package org.azkfw.document.tools.parser.dp;
 
 /**
  * このクラスは、ディレクトリ解析の装飾をテキストで定義したクラスです。

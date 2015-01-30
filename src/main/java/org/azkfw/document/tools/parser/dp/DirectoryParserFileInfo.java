@@ -15,24 +15,33 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.azkfw.document.tools.dp;
+package org.azkfw.document.tools.parser.dp;
 
 import java.io.File;
 
 /**
- * このインターフェースは、ディレクトリ解析を定義する為のインターフェースです。
+ * このクラスは、ディレクトリ解析のファイル情報を保持するクラスです。
  * 
  * @since 1.0.0
  * @version 1.0.0 2015/01/28
  * @author kawakicchi
  */
-public interface DirectoryParser {
+public class DirectoryParserFileInfo {
 
-	public void parse(final File directory);
+	private File file;
 
-	public void addListener(final DirectoryParserListener listener);
+	private String prefix;
 
-	public void removeListener(final DirectoryParserListener listener);
+	public DirectoryParserFileInfo(final File file, final String prefix) {
+		this.file = file;
+		this.prefix = prefix;
+	}
 
-	public void setDecorator(final DirectoryParserDecorator decorator);
+	public File getFile() {
+		return file;
+	}
+
+	public String getPrefix() {
+		return prefix;
+	}
 }

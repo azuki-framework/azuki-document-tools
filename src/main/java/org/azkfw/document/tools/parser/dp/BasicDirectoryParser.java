@@ -15,13 +15,15 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.azkfw.document.tools.dp;
+package org.azkfw.document.tools.parser.dp;
 
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+
+import org.azkfw.document.tools.parser.AbstractDocumentParser;
 
 /**
  * このクラスは、標準のディレクトリ解析を行うクラスです。
@@ -30,30 +32,14 @@ import java.util.List;
  * @version 1.0.0 2015/01/28
  * @author kawakicchi
  */
-public class BasicDirectoryParser implements DirectoryParser {
+public class BasicDirectoryParser extends AbstractDocumentParser<File, DirectoryParserEvent, DirectoryParserListener> implements DirectoryParser {
 
 	private DirectoryParserEvent event;
-	private List<DirectoryParserListener> listeners;
 
 	private DirectoryParserDecorator decorator;
 
 	public BasicDirectoryParser() {
 		event = new DirectoryParserEvent(this);
-		listeners = new ArrayList<DirectoryParserListener>();
-	}
-
-	@Override
-	public final void addListener(final DirectoryParserListener listener) {
-		synchronized (listeners) {
-			listeners.add(listener);
-		}
-	}
-
-	@Override
-	public final void removeListener(final DirectoryParserListener listener) {
-		synchronized (listeners) {
-			listeners.remove(listener);
-		}
 	}
 
 	@Override
@@ -62,7 +48,7 @@ public class BasicDirectoryParser implements DirectoryParser {
 	}
 
 	@Override
-	public void parse(final File directory) {
+	public void doParse(final File directory) {
 		if (null == decorator) {
 			decorator = new DirectoryParserPlainDecorator();
 		}
@@ -71,17 +57,14 @@ public class BasicDirectoryParser implements DirectoryParser {
 	}
 
 	private void nest(final File file, final String prefix) {
+		// TODO: フィルター処理
 		/*
 		 * if (file.getName().startsWith(".") ||
 		 * "target".equals(file.getName())) { return; }
 		 */
-
 		DirectoryParserFileInfo fi = new DirectoryParserFileInfo(file, prefix);
-		synchronized (listeners) {
-			for (DirectoryParserListener listener : listeners) {
-				listener.directoryParserFindFile(event, fi);
-			}
-		}
+		event.setInfo(fi);
+		callListener(event);
 
 		if (file.isFile()) {
 
