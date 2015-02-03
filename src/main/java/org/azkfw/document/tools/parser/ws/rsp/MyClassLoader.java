@@ -32,6 +32,7 @@ import java.util.jar.JarFile;
 
 import org.azkfw.biz.zip.ZipUtility;
 import org.azkfw.util.FileUtility;
+import org.azkfw.util.UUIDUtility;
 
 /**
  * @since 1.0.0
@@ -85,7 +86,8 @@ public class MyClassLoader {
 					}
 					jarFile.close();
 				} else if (file.getName().toLowerCase().endsWith(".war")) {
-					tempDir = new File("temp");
+					tempDir = Paths.get("temp", UUIDUtility.generateToShortString()).toFile();
+					tempDir.mkdirs();
 					ZipUtility.unzip(file.getAbsolutePath(), tempDir.getAbsolutePath());
 					Path classFilePath = Paths.get(tempDir.getAbsolutePath(), "WEB-INF", "classes");
 

@@ -48,13 +48,26 @@ import org.azkfw.document.tools.parser.dp.DirectoryParserPlainDecorator;
  * @version 1.0.0 2015/01/28
  * @author kawakicchi
  */
-public class ExcelDocument {
+public class DirectoryTreeDocument {
 
+	/**
+	 * メイン関数
+	 * 
+	 * <p>
+	 * 引数は次の通りです。
+	 * <ul>
+	 * <li>構成を出力するディレクトリ</li>
+	 * <li>出力エクセルファイルパス</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * @param args 引数
+	 */
 	public static void main(final String[] args) {
 		File directory = new File(args[0]);
 		File file = new File(args[1]);
 
-		ExcelDocument doc = new ExcelDocument();
+		DirectoryTreeDocument doc = new DirectoryTreeDocument();
 		doc.create(directory, file);
 	}
 
@@ -66,7 +79,7 @@ public class ExcelDocument {
 	private int offsetCol;
 	private int offsetRow;
 
-	public ExcelDocument() {
+	public DirectoryTreeDocument() {
 		decorator = new DirectoryParserPlainDecorator();
 
 		offsetCol = 0;

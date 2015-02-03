@@ -48,7 +48,17 @@ public class BasicDirectoryParser extends AbstractDocumentParser<File, Directory
 	}
 
 	@Override
-	public void doParse(final File directory) {
+	protected void doInitialize() {
+
+	}
+
+	@Override
+	protected void doRelease() {
+
+	}
+
+	@Override
+	protected void doParse(final File directory) {
 		if (null == decorator) {
 			decorator = new DirectoryParserPlainDecorator();
 		}

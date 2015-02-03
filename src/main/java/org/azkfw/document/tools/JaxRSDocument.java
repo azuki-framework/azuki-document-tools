@@ -18,6 +18,7 @@
 package org.azkfw.document.tools;
 
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Enumeration;
@@ -27,14 +28,52 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
+import org.azkfw.document.tools.parser.ws.rsp.BasicRESTfulParser;
+import org.azkfw.document.tools.parser.ws.rsp.RESTfulParser;
+import org.azkfw.document.tools.parser.ws.rsp.RESTfulParserEvent;
+import org.azkfw.document.tools.parser.ws.rsp.RESTfulParserListener;
+
 /**
+ * このクラスは、JAX-RS構成をエクセル出力するクラスです。
+ * 
  * @since 1.0.0
  * @version 1.0.0 2015/01/30
  * @author kawakicchi
  */
 public class JaxRSDocument {
 
-	public static void main(final String[] args) throws IOException, ClassNotFoundException {
+	/**
+	 * メイン関数
+	 * 
+	 * <p>
+	 * 引数は次の通りです。
+	 * <ul>
+	 * <li>クラスパス、jarファイルパス、warファイルパス</li>
+	 * <li>出力エクセルファイルパス</li>
+	 * </ul>
+	 * </p>
+	 * 
+	 * @param args 引数
+	 */
+	public static void main(final String[] args) {
+		File document = new File(args[0]);
+		File destFile = new File(args[1]);
+
+		JaxRSDocument doc = new JaxRSDocument();
+		doc.create(document, destFile);
+	}
+
+	public void create(final File document, final File destFile) {
+		RESTfulParser parser = new BasicRESTfulParser();
+		parser.addListener(new RESTfulParserListener() {
+			@Override
+			public void documentParserCallback(final RESTfulParserEvent event) {
+			}
+		});
+		parser.parse(document);
+	}
+
+	public static void main2(final String[] args) throws IOException, ClassNotFoundException {
 
 		JarFile jarFile = new JarFile(args[0]);
 

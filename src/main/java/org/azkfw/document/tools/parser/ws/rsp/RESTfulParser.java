@@ -30,4 +30,5 @@ import org.azkfw.document.tools.parser.DocumentParser;
  */
 public interface RESTfulParser extends DocumentParser<File, RESTfulParserEvent, RESTfulParserListener> {
 
+	public void setTargetPackage(final String targetPackage);
 }

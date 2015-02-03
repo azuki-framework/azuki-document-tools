@@ -63,5 +63,9 @@ public abstract class AbstractDocumentParser<DOCUMENT, EVENT, LISTENER extends D
 		doParse(document);
 	}
 
+	protected abstract void doInitialize();
+
 	protected abstract void doParse(final DOCUMENT document);
+
+	protected abstract void doRelease();
 }

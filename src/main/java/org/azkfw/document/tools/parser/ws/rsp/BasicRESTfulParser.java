@@ -20,11 +20,14 @@ package org.azkfw.document.tools.parser.ws.rsp;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -38,7 +41,10 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 
+import org.azkfw.biz.zip.ZipUtility;
 import org.azkfw.document.tools.parser.AbstractDocumentParser;
+import org.azkfw.util.FileUtility;
+import org.azkfw.util.StringUtility;
 
 /**
  * @since 1.0.0
@@ -47,55 +53,213 @@ import org.azkfw.document.tools.parser.AbstractDocumentParser;
  */
 public class BasicRESTfulParser extends AbstractDocumentParser<File, RESTfulParserEvent, RESTfulParserListener> implements RESTfulParser {
 
-	public class ClassData {
-		private String path;
-		private Set<String> consumes;
-		private Set<String> produces;
+	private RESTfulParserEvent event;
 
-		public ClassData() {
-			path = "";
-			consumes = new HashSet<String>();
-			produces = new HashSet<String>();
-		}
+	private String targetPackage;
 
-		public ClassData(final ClassData data) {
-			path = data.path;
-			consumes = new HashSet<String>(data.consumes);
-			produces = new HashSet<String>(data.produces);
-		}
+	public BasicRESTfulParser() {
+		event = new RESTfulParserEvent(this);
+		targetPackage = null;
+	}
 
-		public void setPath(final String path) {
-			this.path = path;
-		}
+	@Override
+	public final void setTargetPackage(final String targetPackage) {
+		this.targetPackage = targetPackage;
+	}
 
-		public String getPath() {
-			return path;
-		}
+	@Override
+	protected final void doInitialize() {
 
-		public void addConsume(final String consume) {
-			consumes.add(consume);
-		}
+	}
 
-		public void addProduce(final String produce) {
-			produces.add(produce);
+	@Override
+	protected final void doRelease() {
+
+	}
+
+	@Override
+	protected final void doParse(final File document) {
+		ClassLoader cl = null;
+
+		File tempDir = null;
+		try {
+			List<String> classPaths = new ArrayList<String>();
+
+			if (document.isDirectory()) {
+				// get class file
+				List<File> files = new ArrayList<File>();
+				getClassFile(document, files);
+
+				// create class loader
+				cl = URLClassLoader.newInstance(new URL[] { document.toURI().toURL() }, ClassLoader.getSystemClassLoader());
+
+				// class
+				int preSize = document.getAbsolutePath().length() + 1;
+				for (File f : files) {
+					String s = f.getAbsolutePath().substring(preSize, f.getAbsolutePath().length() - 6);
+					s = s.replaceAll("\\\\", ".");
+					s = s.replaceAll("/", ".");
+					classPaths.add(s);
+				}
+			} else {
+				if (document.getName().toLowerCase().endsWith(".jar")) {
+
+					// create class loader
+					cl = URLClassLoader.newInstance(new URL[] { document.toURI().toURL() }, ClassLoader.getSystemClassLoader());
+
+					// class
+					JarFile jarFile = new JarFile(document);
+					for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements();) {
+						JarEntry entry = e.nextElement();
+						if (!entry.isDirectory()) {
+							if (entry.getName().toLowerCase().endsWith(".class")) {
+								String s = entry.getName();
+								s = s.substring(0, s.length() - 6);
+								s = s.replaceAll("\\\\", ".");
+								s = s.replaceAll("/", ".");
+								classPaths.add(s);
+							}
+						}
+					}
+					jarFile.close();
+				} else if (document.getName().toLowerCase().endsWith(".war")) {
+					tempDir = Paths.get("temp").toFile();
+					tempDir.mkdirs();
+					ZipUtility.unzip(document.getAbsolutePath(), tempDir.getAbsolutePath());
+					java.nio.file.Path classFilePath = Paths.get(tempDir.getAbsolutePath(), "WEB-INF", "classes");
+
+					// get class file
+					List<File> files = new ArrayList<File>();
+					getClassFile(classFilePath.toFile(), files);
+
+					// create class loader
+					List<URL> urls = new ArrayList<URL>();
+					urls.add(classFilePath.toUri().toURL());
+					File fs = Paths.get(tempDir.getAbsolutePath(), "WEB-INF", "lib").toFile();
+					for (File f : fs.listFiles()) {
+						if (f.isFile()) {
+							if (f.getName().toLowerCase().endsWith(".jar")) {
+								urls.add(f.toURI().toURL());
+							}
+						}
+					}
+					cl = URLClassLoader.newInstance(urls.toArray(new URL[] {}), ClassLoader.getSystemClassLoader());
+
+					// class
+					int preSize = classFilePath.toFile().getAbsolutePath().length() + 1;
+					for (File f : files) {
+						String s = f.getAbsolutePath().substring(preSize, f.getAbsolutePath().length() - 6);
+						s = s.replaceAll("\\\\", ".");
+						s = s.replaceAll("/", ".");
+						classPaths.add(s);
+					}
+				}
+			}
+
+			for (String path : classPaths) {
+				Class<?> clazz = cl.loadClass(path);
+				doParse(clazz);
+			}
+
+		} catch (ClassNotFoundException ex) {
+			ex.printStackTrace();
+		} catch (MalformedURLException ex) {
+			ex.printStackTrace();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		} finally {
+			if (null != tempDir) {
+				FileUtility.remove(tempDir);
+			}
 		}
 	}
 
-	public class MethodData extends ClassData {
+	private void doParse(final Class<?> clazz) {
+		if (StringUtility.isEmpty(targetPackage) || clazz.getName().startsWith(targetPackage)) {
 
-		private Set<String> methodTypes;
+			ClassData classData = getClassData(clazz);
 
-		public MethodData() {
-			methodTypes = new HashSet<String>();
+			Path pathClass = clazz.getAnnotation(Path.class);
+			if (null != pathClass) {
+
+				Method[] methods = clazz.getMethods();
+				for (Method method : methods) {
+
+					MethodData methodData = getMethodData(method, classData);
+					if (null != methodData) {
+						System.out.println(methodData.getPath());
+					}
+
+				}
+			}
+
 		}
+	}
 
-		public MethodData(final ClassData data) {
-			super(data);
-			methodTypes = new HashSet<String>();
+	private void getClassFile(final File file, final List<File> files) {
+		if (file.isFile()) {
+			if (file.getName().toLowerCase().endsWith(".class")) {
+				files.add(file);
+			}
+		} else {
+			File[] fs = file.listFiles();
+			for (File f : fs) {
+				getClassFile(f, files);
+			}
 		}
+	}
 
-		public void addMethodType(final String type) {
-			methodTypes.add(type);
+	protected final void test(final File document) {
+		String basePath = "WEB-INF/classes/";
+		String targetClassPath = "org.azkfw";
+
+		String targetDir = targetClassPath.replace(".", "/");
+		if (!targetDir.endsWith("/")) {
+			targetDir += "/";
+		}
+		targetDir = basePath + targetDir;
+
+		try {
+			URL[] urls = { document.toURI().toURL() };
+			ClassLoader loader = URLClassLoader.newInstance(urls);
+
+			JarFile jarFile = new JarFile(document);
+			for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements();) {
+
+				JarEntry entry = e.nextElement();
+				if (!entry.isDirectory()) {
+					String name = entry.getName();
+					System.out.println(name);
+					if (name.startsWith(targetDir) && name.endsWith(".class")) {
+
+						String classPath = name.substring(basePath.length(), name.length() - 6).replace("/", ".");
+						Class<?> clazz = loader.loadClass(classPath);
+
+						ClassData classData = getClassData(clazz);
+
+						Path pathClass = clazz.getAnnotation(Path.class);
+						if (null != pathClass) {
+
+							Method[] methods = clazz.getMethods();
+							for (Method method : methods) {
+
+								MethodData methodData = getMethodData(method, classData);
+								if (null != methodData) {
+									System.out.println(methodData.getPath());
+								}
+
+							}
+						}
+
+					}
+				}
+			}
+			jarFile.close();
+
+		} catch (ClassNotFoundException ex) {
+			ex.printStackTrace();
+		} catch (IOException ex) {
+			ex.printStackTrace();
 		}
 	}
 
@@ -164,59 +328,55 @@ public class BasicRESTfulParser extends AbstractDocumentParser<File, RESTfulPars
 		return data;
 	}
 
-	@Override
-	protected final void doParse(final File document) {
-		String basePath = "WEB-INF/classes/";
-		String targetClassPath = "org.azkfw";
+	public class ClassData {
+		private String path;
+		private Set<String> consumes;
+		private Set<String> produces;
 
-		String targetDir = targetClassPath.replace(".", "/");
-		if (!targetDir.endsWith("/")) {
-			targetDir += "/";
+		public ClassData() {
+			path = "";
+			consumes = new HashSet<String>();
+			produces = new HashSet<String>();
 		}
-		targetDir = basePath + targetDir;
 
-		try {
-			URL[] urls = { document.toURI().toURL() };
-			ClassLoader loader = URLClassLoader.newInstance(urls);
+		public ClassData(final ClassData data) {
+			path = data.path;
+			consumes = new HashSet<String>(data.consumes);
+			produces = new HashSet<String>(data.produces);
+		}
 
-			JarFile jarFile = new JarFile(document);
-			for (Enumeration<JarEntry> e = jarFile.entries(); e.hasMoreElements();) {
+		public void setPath(final String path) {
+			this.path = path;
+		}
 
-				JarEntry entry = e.nextElement();
-				if (!entry.isDirectory()) {
-					String name = entry.getName();
-					System.out.println(name);
-					if (name.startsWith(targetDir) && name.endsWith(".class")) {
+		public String getPath() {
+			return path;
+		}
 
-						String classPath = name.substring(basePath.length(), name.length() - 6).replace("/", ".");
-						Class<?> clazz = loader.loadClass(classPath);
+		public void addConsume(final String consume) {
+			consumes.add(consume);
+		}
 
-						ClassData classData = getClassData(clazz);
-
-						Path pathClass = clazz.getAnnotation(Path.class);
-						if (null != pathClass) {
-
-							Method[] methods = clazz.getMethods();
-							for (Method method : methods) {
-
-								MethodData methodData = getMethodData(method, classData);
-								if (null != methodData) {
-									System.out.println(methodData.getPath());
-								}
-
-							}
-						}
-
-					}
-				}
-			}
-			jarFile.close();
-
-		} catch (ClassNotFoundException ex) {
-			ex.printStackTrace();
-		} catch (IOException ex) {
-			ex.printStackTrace();
+		public void addProduce(final String produce) {
+			produces.add(produce);
 		}
 	}
 
+	public class MethodData extends ClassData {
+
+		private Set<String> methodTypes;
+
+		public MethodData() {
+			methodTypes = new HashSet<String>();
+		}
+
+		public MethodData(final ClassData data) {
+			super(data);
+			methodTypes = new HashSet<String>();
+		}
+
+		public void addMethodType(final String type) {
+			methodTypes.add(type);
+		}
+	}
 }
