@@ -150,18 +150,38 @@ public class FieldModel {
 		return notNullFlag;
 	}
 
+	/**
+	 * デフォルト値の有無を設定する。
+	 * 
+	 * @param flag フラグ
+	 */
 	public void setDefaultFlag(final boolean flag) {
 		this.defaultFlag = flag;
 	}
 
+	/**
+	 * デフォルト値の有無を判断する。
+	 * 
+	 * @return 判断
+	 */
 	public boolean isDefaultFlag() {
 		return defaultFlag;
 	}
 
+	/**
+	 * デフォルト値を設定する。
+	 * 
+	 * @param value デフォルト値
+	 */
 	public void setDefaultValue(final Object value) {
 		this.defaultValue = value;
 	}
 
+	/**
+	 * デフォルト値を取得する。
+	 * 
+	 * @return 　デフォルト値
+	 */
 	public Object getDefaultValue() {
 		return defaultValue;
 	}

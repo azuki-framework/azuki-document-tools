@@ -35,10 +35,15 @@ public class ForeignKeyModel {
 	/** フィールドリスト */
 	private List<ForeignKeyFeildModel> fields;
 
+	/** 参照テーブル名 */
 	private String referenceTableName;
 
+	/** 参照フィールドリスト */
 	private List<ForeignKeyFeildModel> referenceFields;
 
+	/**
+	 * コンストラクタ
+	 */
 	public ForeignKeyModel() {
 		name = null;
 		fields = new ArrayList<ForeignKeyFeildModel>();
@@ -64,26 +69,56 @@ public class ForeignKeyModel {
 		return name;
 	}
 
+	/**
+	 * フィールドを追加する。
+	 * 
+	 * @param field フィールド
+	 */
 	public void addField(final ForeignKeyFeildModel field) {
 		this.fields.add(field);
 	}
 
+	/**
+	 * フィールドリストを取得する。
+	 * 
+	 * @return リスト
+	 */
 	public List<ForeignKeyFeildModel> getFields() {
 		return fields;
 	}
 
+	/**
+	 * 参照テーブル名を設定する。
+	 * 
+	 * @param name テーブル名
+	 */
 	public void setReferenceTableName(final String name) {
 		referenceTableName = name;
 	}
 
+	/**
+	 * 参照テーブル名を取得する。
+	 * 
+	 * @return テーブル名
+	 */
 	public String getReferenceTableName() {
 		return referenceTableName;
 	}
 
+	/**
+	 * 参照フィールドを追加する。
+	 * 
+	 * @param field フィールド
+	 */
 	public void addReferenceField(final ForeignKeyFeildModel field) {
 		referenceFields.add(field);
 	}
 
+	/**
+	 * 参照フィールドリストを取得する。
+	 * 
+	 * @return フィールド
+	 */
 	public List<ForeignKeyFeildModel> getReferenceFields() {
 		return referenceFields;
 	}

@@ -131,6 +131,12 @@ public final class TableModel {
 		return fields;
 	}
 
+	/**
+	 * フィールドを取得する。
+	 * 
+	 * @param name フィールド名
+	 * @return フィールド。フィールドが存在しない場合、<code>null</code>を返す。
+	 */
 	public FieldModel getField(final String name) {
 		for (FieldModel field : fields) {
 			if (field.getName().equals(name)) {
@@ -158,6 +164,12 @@ public final class TableModel {
 		return indexs;
 	}
 
+	/**
+	 * インデックスを取得する。
+	 * 
+	 * @param name インデックス名
+	 * @return インデックス。インデックスが存在しない場合、<code>null</code>を返す。
+	 */
 	public IndexModel getIndex(final String name) {
 		for (IndexModel index : indexs) {
 			if (index.getName().equals(name)) {
@@ -167,18 +179,48 @@ public final class TableModel {
 		return null;
 	}
 
+	/**
+	 * 外部キーを追加する。
+	 * 
+	 * @param foreignKey 外部キー
+	 */
 	public void addForeignKey(final ForeignKeyModel foreignKey) {
-		this.addForeignKey(foreignKey);
+		this.foreignKeys.add(foreignKey);
 	}
 
+	/**
+	 * 外部キーリストを取得する。
+	 * 
+	 * @return 外部キーリスト
+	 */
 	public List<ForeignKeyModel> getForeignKeys() {
 		return foreignKeys;
 	}
 
+	/**
+	 * 外部キーを取得する。
+	 * 
+	 * @param name 外部キー名
+	 * @return 外部キー。外部キーが存在しない場合、<code>null</code>を返す。
+	 */
 	public ForeignKeyModel getForeignKey(final String name) {
 		for (ForeignKeyModel foreignKey : foreignKeys) {
 			if (foreignKey.getName().equals(name)) {
 				return foreignKey;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * 主キーのインデックスを取得する。
+	 * 
+	 * @return 主キーが存在しない場合、<code>null</code>を返す。
+	 */
+	public IndexModel getPrimaryIndex() {
+		for (IndexModel index : indexs) {
+			if (index.isPrimaryKey()) {
+				return index;
 			}
 		}
 		return null;

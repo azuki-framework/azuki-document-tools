@@ -17,14 +17,17 @@
  */
 package org.azkfw.document.tools.parser.db;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.azkfw.document.tools.parser.db.model.DatasourceModel;
 import org.azkfw.document.tools.parser.db.model.FieldModel;
 import org.azkfw.document.tools.parser.db.model.FieldTypeModel;
 import org.azkfw.document.tools.parser.db.model.ForeignKeyFeildModel;
@@ -51,14 +54,14 @@ public class Sample {
 	}
 
 	public void start() {
+		DatasourceModel datasource = new DatasourceModel();
+
 		Connection connection = null;
 		PreparedStatement ps = null;
 		ResultSet rs = null;
 		try {
 			Class.forName("com.mysql.jdbc.Driver");
 			connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/", "", "");
-
-			List<TableModel> tables = new ArrayList<TableModel>();
 
 			// テーブル一覧取得
 			ps = connection.prepareStatement("SHOW TABLES");
@@ -71,9 +74,9 @@ public class Sample {
 
 				putTable(table, "bpsrv", connection);
 
-				// select TABLE_NAME,TABLE_COMMENT from information_schema.tables where TABLE_SCHEMA = 'bpsrv';
+				// select TABLE_NAME,TABLE_COMMENT from information_schema.tables where TABLE_SCHEMA = '';
 
-				tables.add(table);
+				datasource.addTable(table);
 			}
 			rs.close();
 			rs = null;
@@ -105,6 +108,8 @@ public class Sample {
 				}
 			}
 		}
+
+		outputDatasource(datasource, new File("C:\\temp\\sample.xlsx"));
 	}
 
 	private void putTable(final TableModel table, final String schema, final Connection connection) throws SQLException {
@@ -134,7 +139,7 @@ public class Sample {
 					field.setDefaultValue(def);
 				}
 
-				// select column_name, column_comment from information_schema.columns where TABLE_SCHEMA = 'bpsrv';
+				// select column_name, column_comment from information_schema.columns where TABLE_SCHEMA = '';
 
 				table.addField(field);
 			}
@@ -157,6 +162,7 @@ public class Sample {
 				if (null == index) {
 					index = new IndexModel();
 					index.setName(name);
+					index.setPrimaryKey("PRIMARY".equals(name));
 					index.setUnique(0 == nonUnique);
 					table.addIndex(index);
 				}
@@ -204,28 +210,6 @@ public class Sample {
 			ps.close();
 			ps = null;
 
-			if (false) {
-				// 逆参照だから不必要
-				// 外部キー
-				System.out.println("  Foreign keys 2  ==========");
-				ps = connection.prepareStatement(getSQL1());
-				ps.setString(1, schema);
-				ps.setString(2, table.getName());
-				rs = ps.executeQuery();
-				while (rs.next()) {
-					String keyName = rs.getString("key_name");
-					String columnName = rs.getString("column_name");
-					String refTableName = rs.getString("referenced_table_name");
-					String refColumnName = rs.getString("referenced_column_name");
-
-					System.out.println(String.format("  %s %s %s %s", keyName, columnName, refTableName, refColumnName));
-				}
-				rs.close();
-				rs = null;
-				ps.close();
-				ps = null;
-			}
-
 		} finally {
 			if (null != rs) {
 				try {
@@ -264,6 +248,7 @@ public class Sample {
 		return sql.toString();
 	}
 
+	@SuppressWarnings("unused")
 	private String getSQL2() {
 		StringBuilder sql = new StringBuilder();
 
@@ -283,4 +268,19 @@ public class Sample {
 
 		return sql.toString();
 	}
+
+	public void outputDatasource(final DatasourceModel datasource, final File destFile) {
+		try {
+			XLSXWriter writer = new XLSXWriter();
+
+			XSSFWorkbook wb = writer.write(datasource);
+
+			FileOutputStream out = new FileOutputStream(destFile);
+			wb.write(out);
+			out.close();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+	}
+
 }

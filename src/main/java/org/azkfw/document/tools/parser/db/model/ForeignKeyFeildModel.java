@@ -26,16 +26,30 @@ package org.azkfw.document.tools.parser.db.model;
  */
 public class ForeignKeyFeildModel {
 
+	/** フィールド名 */
 	private String name;
 
+	/**
+	 * コンストラクタ
+	 */
 	public ForeignKeyFeildModel() {
-
+		name = null;
 	}
 
+	/**
+	 * フィールド名を設定する。
+	 * 
+	 * @param name フィールド名
+	 */
 	public void setName(final String name) {
 		this.name = name;
 	}
 
+	/**
+	 * フィールド名を取得する。
+	 * 
+	 * @return フィールド名
+	 */
 	public String getName() {
 		return name;
 	}

@@ -17,40 +17,58 @@
  */
 package org.azkfw.document.tools.parser.db.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
- * このクラスは、フィールドタイプ情報を保持するモデルクラスです。
+ * このクラスは、データソース情報を保持するモデルクラスです。
  * 
  * @since 1.0.0
- * @version 1.0.0 2015/02/04
+ * @version 1.0.0 2015/02/05
  * @author kawakicchi
  */
-public class FieldTypeModel {
+public class DatasourceModel {
 
-	/** ラベル */
-	private String label;
+	/** テーブルリスト */
+	private List<TableModel> tables;
 
 	/**
 	 * コンストラクタ
 	 */
-	public FieldTypeModel() {
-		label = null;
+	public DatasourceModel() {
+		tables = new ArrayList<TableModel>();
 	}
 
 	/**
-	 * ラベルを設定する。
+	 * テーブルを追加する。
 	 * 
-	 * @param label ラベル
+	 * @param table テーブル
 	 */
-	public void setLabel(final String label) {
-		this.label = label;
+	public void addTable(final TableModel table) {
+		this.tables.add(table);
 	}
 
 	/**
-	 * ラベルを取得する。
+	 * テーブルリストを取得する。
 	 * 
-	 * @return ラベル
+	 * @return テーブルリスト
 	 */
-	public String getLabel() {
-		return label;
+	public List<TableModel> getTables() {
+		return tables;
+	}
+
+	/**
+	 * テーブルを取得する。
+	 * 
+	 * @param name テーブル名
+	 * @return テーブル。テーブルが存在しない場合、<code>null</code>を返す。
+	 */
+	public TableModel getTable(final String name) {
+		for (TableModel table : tables) {
+			if (table.getName().equals(name)) {
+				return table;
+			}
+		}
+		return null;
 	}
 }
