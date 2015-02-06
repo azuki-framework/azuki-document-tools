@@ -18,7 +18,7 @@
 
 	<groupId>org.azkfw</groupId>
 	<artifactId>azuki-document-tools</artifactId>
-	<version>1.4.4</version>
+	<version>0.0.1</version>
 	<packaging>jar</packaging>
 
 	<name>azuki-document-tools</name>
@@ -54,11 +54,10 @@
 			<artifactId>azuki-biz</artifactId>
 			<version>1.4.4</version>
 		</dependency>
-
 		<dependency>
-			<groupId>org.apache.poi</groupId>
-			<artifactId>poi-ooxml</artifactId>
-			<version>3.10-FINAL</version>
+			<groupId>org.azkfw</groupId>
+			<artifactId>azuki-document</artifactId>
+			<version>0.0.1</version>
 		</dependency>
 
 		<dependency>
@@ -72,6 +71,11 @@
 			<version>8.1.8.v20121106</version>
 		</dependency>
 
+		<dependency>
+			<groupId>postgresql</groupId>
+			<artifactId>postgresql</artifactId>
+			<version>9.1-901.jdbc4</version>
+		</dependency>
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
