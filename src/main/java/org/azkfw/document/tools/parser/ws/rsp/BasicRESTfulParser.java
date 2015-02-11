@@ -53,6 +53,7 @@ import org.azkfw.util.StringUtility;
  */
 public class BasicRESTfulParser extends AbstractDocumentParser<File, RESTfulParserEvent, RESTfulParserListener> implements RESTfulParser {
 
+	@SuppressWarnings("unused")
 	private RESTfulParserEvent event;
 
 	private String targetPackage;
